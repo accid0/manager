@@ -22,6 +22,13 @@ class Kohana_Manager
    * @var array
    */
   private $actions = array();
+
+  /**
+   * Gets params of query
+   *
+   * @var array
+   */
+  private $gets = array();
   /**
    *
    * Enter description here ...
@@ -64,7 +71,17 @@ class Kohana_Manager
    */
   private function __construct($uri)
   {
-    $this->actions = explode('/', $uri);
+    if ( Utf8::strpos( $uri, '?') !== FALSE)
+      $uri = explode( '?', $uri);
+    if ( $uri[0] == '' && count($uri) > 1)
+      array_shift($uri);
+    $gets = array();
+    parse_str($uri[1], $gets);
+    $this->gets = $gets;
+    $actions = explode('/', $uri[0]);
+    if ( $actions[0] == '' && count($actions) > 1)
+      array_shift($actions);
+    $this->actions = $actions;
     $this->config  = Kohana::$config->load('manager');
   }
 
@@ -91,6 +108,14 @@ class Kohana_Manager
       $this->init = FALSE;
       $directory  = $this->config->get('views');
       $directory  = $directory['path'];
+
+      $query = '';
+      $i=1;
+      while($i < count($this->actions)-1)
+        $query .= $this->actions[$i++] . '/';
+      if ( isset( $this->actions[$i]))
+        $query .= $this->actions[$i];
+
       if (!empty($directory)) $directory .= DIRECTORY_SEPARATOR;
       if (empty($this->actions[0])) {
         $directory .= 'index';
@@ -98,7 +123,8 @@ class Kohana_Manager
           'controller' => 'main',
           'action'     => 'index',
           'position'   => 0,
-          'directory'  => $directory
+          'directory'  => $directory,
+          'query'      => $query,
         );
       }
       else {
@@ -107,34 +133,36 @@ class Kohana_Manager
           'controller' => 'main',
           'action'     => 'index',
           'position'   => 0,
-          'directory'  => $directory
+          'directory'  => $directory,
+          'query'      => $query,
         );
       }
     }
     else {
       $actions = explode('/', $uri);
-      $this->ensure(empty($actions[0]), "[Module::Manager] Not found uri[$uri];");
+      $this->ensure(empty($actions[0]), "[Module::Manager] Uri empty;");
       $request    = Request::current();
       $position   = $request->param('position');
-      $controller = $request->controller();
+
       $directory  = $request->directory();
-      $current    = $request->action();
-      $this->ensure(!isset($this->actions[++$position]),
-        "[Module::Manager] Not found uri for index [$position]");
-      $action = URL::title( $this->actions[$position], '', TRUE);
+
+      if( isset($this->actions[++$position]))
+        $directory = $directory . DIRECTORY_SEPARATOR . URL::title( $this->actions[$position], '', TRUE);
+
       $result = array(
         'controller' => $actions[0],
         'action'     => 'index',
-        'directory'  => $directory . DIRECTORY_SEPARATOR . $action,
+        'directory'  => $directory,
       );
       unset($actions[0]);
       foreach ($actions as $i => $key) {
         $this->ensure(!isset($this->actions[++$position]),
-          "[Module::Manager] Not found param [$key] from uri");
+          "[Module::Manager] Not found param [$key] from uri index [$position] ");
         $result [$key] = $this->actions[$position];
       }
       $result['position'] = $position;
     }
+    $result = Arr::merge( $result, $this->gets);
     return $result;
   }
 
@@ -223,9 +251,9 @@ EOF;
    */
   public static function parse($uri)
   {
-    $uri      = preg_replace('!\\|\s!', '/', $uri);
-    $uri      = preg_replace('!/++!', '/', $uri);
-    $uri      = trim($uri, '/');
+    $uri      = preg_replace("!\\|\s!u", '/', $uri);
+    $uri      = preg_replace("!/++!u", '/', $uri);
+    $uri      = Utf8::trim($uri, "/");
     $uri      = Utf8::strtolower($uri);
     $instance = self::instance($uri);
     $result   = $instance->doParse($uri);
