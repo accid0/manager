@@ -91,21 +91,21 @@ class Kohana_Manager
       $this->init = FALSE;
       $directory  = $this->config->get('views');
       $directory  = $directory['path'];
-      if ( !empty($directory)) $directory .= DIRECTORY_SEPARATOR;
+      if (!empty($directory)) $directory .= DIRECTORY_SEPARATOR;
       if (empty($this->actions[0])) {
         $directory .= 'index';
         $result = array(
           'controller' => 'main',
-          'action'     => 'action',
+          'action'     => 'index',
           'position'   => 0,
           'directory'  => $directory
         );
       }
-      else{
-        $directory .= $this->actions[0];
+      else {
+        $directory .= URL::title( $this->actions[0], '', TRUE);
         $result = array(
           'controller' => 'main',
-          'action'     => 'action',
+          'action'     => 'index',
           'position'   => 0,
           'directory'  => $directory
         );
@@ -121,10 +121,10 @@ class Kohana_Manager
       $current    = $request->action();
       $this->ensure(!isset($this->actions[++$position]),
         "[Module::Manager] Not found uri for index [$position]");
-      $action = $this->actions[$position];
+      $action = URL::title( $this->actions[$position], '', TRUE);
       $result = array(
         'controller' => $actions[0],
-        'action'     => 'action',
+        'action'     => 'index',
         'directory'  => $directory . DIRECTORY_SEPARATOR . $action,
       );
       unset($actions[0]);
@@ -148,7 +148,7 @@ class Kohana_Manager
   {
     $config = $this->config['views'];
 
-    $file   = new SplFileInfo(
+    $file = new SplFileInfo(
       APPPATH .
         'classes' . DIRECTORY_SEPARATOR . $class . EXT);
 
@@ -157,7 +157,7 @@ class Kohana_Manager
     $this->ensure($config['create'] !== TRUE && !class_exists($class),
       "[Modules::Manager] class [$class] not found");
 
-    if ( !class_exists($class) ) {
+    if (!class_exists($class)) {
       $name = str_replace('_', ' ', $class);
       $name = Utf8::ucwords($name);
       $name = str_replace(' ', '_', $name);
@@ -179,7 +179,7 @@ class $name extends Controller_Manager{
   /**
    * view file for action
    * @var string
-  */
+   */
   protected \$template = '';
 
   /**

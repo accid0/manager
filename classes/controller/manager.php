@@ -95,7 +95,7 @@ abstract class Controller_Manager extends Controller {
    * For params of action
    * @see Request::param( $sid, $default)
    */
-  public function action(){
+  public function action_index(){
     $this->do_action();
   }
 
