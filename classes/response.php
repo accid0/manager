@@ -11,25 +11,29 @@
  * @license    http://kohanaphp.com/license
  * @since      3.1.0
  */
-class Response extends Kohana_Response {
+class Response extends Kohana_Response
+{
   /**
    * (non-PHPdoc)
+   *
    * @see Kohana_Response::body()
    */
   public function body($content = NULL)
   {
-	if ($content === NULL)
-	  return $this->_body;
+    if ($content === NULL)
+      return $this->_body;
 
-	$this->_body = $content;
-	return $this;
+    $this->_body = $content;
+    return $this;
   }
+
   /**
    * (non-PHPdoc)
+   *
    * @see Kohana_Response::__toString()
    */
   public function __toString()
   {
-	return (string)$this->_body;
+    return (string)$this->_body;
   }
 }

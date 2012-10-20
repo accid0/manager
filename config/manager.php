@@ -3,8 +3,8 @@
 return array
 (
   'views' => array(
-    'path' => 'views',
+    'path'   => '',
     'create' => TRUE,
-    'theme' => '/theme/mws/'
+    'theme'  => '/theme/mws/'
   )
 );

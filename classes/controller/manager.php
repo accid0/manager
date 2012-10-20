@@ -7,9 +7,13 @@ abstract class Controller_Manager extends Controller {
    */
   private static $extends = NULL;
   /**
-   * @var View
+   * @var string
    */
   protected $template = NULL;
+  /**
+   * @var View
+   */
+  protected $view = NULL;
   /**
    * 
    * @var string
@@ -19,10 +23,6 @@ abstract class Controller_Manager extends Controller {
    * @var boolean
    */
   protected $auto_render = TRUE;
-  /**
-   * @var array
-   */
-  protected $templates = array();
   /**
    * @param boolean $exp
    * @param string $msg
@@ -49,7 +49,7 @@ abstract class Controller_Manager extends Controller {
    */
   protected function extend( $uri){
     $response = (string)Request::factory( $uri)->execute();
-    if ( $this->template && $this->file)  $this->template->set_filename( $this->file);
+    if ( $this->view && $this->file)  $this->view->set_filename( $this->file);
     return $response;
   }
   /**
@@ -64,39 +64,58 @@ abstract class Controller_Manager extends Controller {
   
   /**
    * (non-PHPdoc)
-   * @see Kohana_Controller_Template::before()
+   * @see Kohana_Controller::before()
    */
   public function before(){
     $action = Request::current()->action();
-    if( isset($this->templates[$action])){
-      $this->file = $this->templates[$action];
+    if( !empty($this->template)){
+      $this->file = $this->template;
     }
     if ( $this->auto_render === TRUE){
       if ( Manager::template()){
-        $this->template = Manager::template();
+        $this->view = Manager::template();
         if ( $this->file)
-          $this->template->set_filename( $this->file);
+          $this->view->set_filename( $this->file);
         else{
           $this->auto_render = FALSE;
-          $this->file = $this->template->get_filename();
+          $this->file = $this->view->get_filename();
         }
       }
       elseif( $this->file){
-        $this->template = View::factory( $this->file);
-        Manager::template( $this->template);
+        $this->view = View::factory( $this->file);
+        Manager::template( $this->view);
       }
     }
     $this->initialize();
     parent::before();
   }
+
+  /**
+   * Standart action method of controller from manager
+   * For params of action
+   * @see Request::param( $sid, $default)
+   */
+  public function action(){
+    $this->do_action();
+  }
+
+  /**
+   * Innerhiting this method for your controller
+   * For params of action
+   * @see Request::param( $sid, $default)
+   */
+  protected function do_action(){
+
+  }
+
   /**
    * (non-PHPdoc)
-   * @see Kohana_Controller_Template::after()
+   * @see Kohana_Controller::after()
    */
   public function after(){
     $this->finalize();
-    if ( $this->auto_render === TRUE && $this->template){
-      $this->response->body( $this->template);
+    if ( $this->auto_render === TRUE && $this->view){
+      $this->response->body( $this->view);
     }
     parent::after();
   }
