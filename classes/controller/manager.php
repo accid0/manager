@@ -45,7 +45,7 @@ abstract class Controller_Manager extends Controller {
    * 
    * Enter description here ...
    * @param string $uri
-   * @return mixed
+   * @return string
    */
   protected function extend( $uri){
     $response = (string)Request::factory( $uri)->execute();
@@ -55,10 +55,11 @@ abstract class Controller_Manager extends Controller {
   /**
    * 
    * @param string $uri
-   * @return mixed
+   * @return string
    */
   protected function execute( $uri){
     $response = (string)Manager::execute($uri);
+    if ( $this->view && $this->file)  $this->view->set_filename( $this->file);
     return $response;
   }
   
@@ -67,21 +68,20 @@ abstract class Controller_Manager extends Controller {
    * @see Kohana_Controller::before()
    */
   public function before(){
-    $action = Request::current()->action();
-    if( !empty($this->template)){
+    if( $this->template != ''){
       $this->file = $this->template;
     }
     if ( $this->auto_render === TRUE){
       if ( Manager::template()){
         $this->view = Manager::template();
-        if ( $this->file)
+        if ( $this->file != NULL && $this->file != '')
           $this->view->set_filename( $this->file);
         else{
           $this->auto_render = FALSE;
           $this->file = $this->view->get_filename();
         }
       }
-      elseif( $this->file){
+      elseif( $this->file != NULL && $this->file != ''){
         $this->view = View::factory( $this->file);
         Manager::template( $this->view);
       }
