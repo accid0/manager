@@ -231,7 +231,7 @@ class $name extends Controller_Manager{
    * @see Controller_Manager::do_action()
    */
   protected function do_action(){
-    \$this->response->body( \$this->view);
+
   }
 }
 EOF;
@@ -289,7 +289,7 @@ EOF;
     $current        = self::instance();
     self::$instance = NULL;
     self::instance($uri)->template($template);
-    $response       = Request::factory($uri, HTTP_Cache::factory('file'))->execute();
+    $response       = Request::factory($uri/*, HTTP_Cache::factory('file')*/)->execute();
     self::$instance = $current;
     return $response;
   }

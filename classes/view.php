@@ -14,6 +14,8 @@ class View extends Kohana_View {
    * @return string
    */
   public function get_filename(){
-    return $this->_file;
+    $file = str_replace( array(APPPATH, MODPATH, SYSPATH, EXT), '', $this->_file);
+    $file = Utf8::substr($file, Utf8::strpos( $file, 'views/') + 6);
+    return $file;
   }
 }
