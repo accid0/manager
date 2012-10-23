@@ -1,11 +1,6 @@
 <?php defined('SYSPATH') or die('No direct script access.');
 
 abstract class Controller_Manager extends Controller {
-  
-  /**
-   * @var View
-   */
-  private static $extends = NULL;
   /**
    * @var string
    */
@@ -57,8 +52,8 @@ abstract class Controller_Manager extends Controller {
    * @param string $uri
    * @return string
    */
-  protected function execute( $uri){
-    $response = (string)Manager::execute($uri);
+  protected function execute( $uri, View $view = NULL){
+    $response = (string)Manager::execute($uri, $view);
     if ( $this->view && $this->file)  $this->view->set_filename( $this->file);
     return $response;
   }
@@ -68,12 +63,12 @@ abstract class Controller_Manager extends Controller {
    * @see Kohana_Controller::before()
    */
   public function before(){
+    $this->initialize();
     if( $this->template != ''){
       $this->file = $this->template;
     }
     if ( $this->auto_render === TRUE){
-      if ( Manager::template()){
-        $this->view = Manager::template();
+      if ( $this->view = Manager::template()){
         if ( $this->file != NULL && $this->file != '')
           $this->view->set_filename( $this->file);
         else{
@@ -86,7 +81,6 @@ abstract class Controller_Manager extends Controller {
         Manager::template( $this->view);
       }
     }
-    $this->initialize();
     parent::before();
   }
 
@@ -113,10 +107,10 @@ abstract class Controller_Manager extends Controller {
    * @see Kohana_Controller::after()
    */
   public function after(){
-    $this->finalize();
     if ( $this->auto_render === TRUE && $this->view){
       $this->response->body( $this->view);
     }
+    $this->finalize();
     parent::after();
   }
 

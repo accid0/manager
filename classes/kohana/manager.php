@@ -59,7 +59,7 @@ class Kohana_Manager
    */
   private static function instance($uri = '')
   {
-    if (is_null(self::$instance)) self::$instance = new self($uri);
+    if ( self::$instance === NULL ) self::$instance = new self($uri);
     return self::$instance;
   }
 
@@ -71,13 +71,15 @@ class Kohana_Manager
    */
   private function __construct($uri)
   {
-    if ( Utf8::strpos( $uri, '?') !== FALSE)
+    if ( Utf8::strpos( $uri, '?') !== FALSE){
       $uri = explode( '?', $uri);
-    if ( $uri[0] == '' && count($uri) > 1)
-      array_shift($uri);
-    $gets = array();
-    parse_str($uri[1], $gets);
-    $this->gets = $gets;
+      if ( $uri[0] == '' && count($uri) > 1)
+        array_shift($uri);
+      $gets = array();
+      parse_str($uri[1], $gets);
+      $this->gets = $gets;
+    }
+    else $uri = array($uri);
     $actions = explode('/', $uri[0]);
     if ( $actions[0] == '' && count($actions) > 1)
       array_shift($actions);
@@ -150,15 +152,15 @@ class Kohana_Manager
         $directory = $directory . DIRECTORY_SEPARATOR . URL::title( $this->actions[$position], '', TRUE);
 
       $result = array(
-        'controller' => $actions[0],
+        'controller' => preg_replace('![^\pL\pN\s]++!u', '', $actions[0]),
         'action'     => 'index',
         'directory'  => $directory,
       );
       unset($actions[0]);
       foreach ($actions as $i => $key) {
-        $this->ensure(!isset($this->actions[++$position]),
-          "[Module::Manager] Not found param [$key] from uri index [$position] ");
-        $result [$key] = $this->actions[$position];
+        if( isset($this->actions[++$position]))
+          $result [$key] = $this->actions[$position];
+        else $result[$key] = NULL;
       }
       $result['position'] = $position;
     }
@@ -286,7 +288,7 @@ EOF;
    */
   public static function execute($uri, $template = NULL)
   {
-    $current        = self::instance();
+    $current        = self::$instance;
     self::$instance = NULL;
     self::instance($uri)->template($template);
     $response       = Request::factory($uri/*, HTTP_Cache::factory('file')*/)->execute();
