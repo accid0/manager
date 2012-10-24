@@ -50,6 +50,11 @@ class Kohana_Manager
   private $template = NULL;
 
   /**
+   * @var HTTP_Cache|NULL
+   */
+  private $cache = NULL;
+
+  /**
    *
    * Enter description here ...
    *
@@ -286,12 +291,14 @@ EOF;
    *
    * @return Response
    */
-  public static function execute($uri, $template = NULL)
+  public static function execute($uri, $template = NULL, HTTP_Cache $cache = NULL)
   {
     $current        = self::$instance;
     self::$instance = NULL;
     self::instance($uri)->template($template);
-    $response       = Request::factory($uri/*, HTTP_Cache::factory('file')*/)->execute();
+    self::instance($uri)->cache($cache);
+    $response       = Request::factory($uri, $cache)->execute();
+    //$response->send_headers();
     self::$instance = $current;
     return $response;
   }
@@ -308,4 +315,18 @@ EOF;
     else  $result = $instance->template;
     return $result;
   }
+
+  /**
+   * @static
+   * @param HTTP_Cache|null $cache
+   * @return HTTP_Cache|null
+   */
+  public static function cache( HTTP_Cache $cache = NULL){
+    $instance = self::instance();
+    $result   = $cache;
+    if (!is_null($cache)) $instance->cache = $cache;
+    else  $result = $instance->cache;
+    return $result;
+  }
+
 }

@@ -23,7 +23,7 @@ class Response extends Kohana_Response
     if ($content === NULL)
       return $this->_body;
 
-    $this->_body = $content;
+    $this->_body = (string)$content;
     return $this;
   }
 

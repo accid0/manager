@@ -34,7 +34,7 @@ abstract class Controller_Manager extends Controller {
   /**
    */
   protected function finalize(){
-    
+
   }
   /**
    * 
@@ -43,7 +43,7 @@ abstract class Controller_Manager extends Controller {
    * @return string
    */
   protected function extend( $uri){
-    $response = (string)Request::factory( $uri)->execute();
+    $response = (string)Request::factory( $uri, Manager::cache())->execute();
     if ( $this->view && $this->file)  $this->view->set_filename( $this->file);
     return $response;
   }
@@ -53,7 +53,7 @@ abstract class Controller_Manager extends Controller {
    * @return string
    */
   protected function execute( $uri, View $view = NULL){
-    $response = (string)Manager::execute($uri, $view);
+    $response = (string)Manager::execute($uri, $view, Manager::cache());
     if ( $this->view && $this->file)  $this->view->set_filename( $this->file);
     return $response;
   }
