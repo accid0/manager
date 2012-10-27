@@ -42,8 +42,10 @@ abstract class Controller_Manager extends Controller {
    * @param string $uri
    * @return string
    */
-  protected function extend( $uri){
-    $response = (string)Request::factory( $uri, Manager::cache())->execute();
+  protected function extend( $uri, $cache = TRUE){
+    if ( $cache) $cache = Manager::cache();
+    else $cache = NULL;
+    $response = (string)Request::factory( $uri, $cache)->execute();
     if ( $this->view && $this->file)  $this->view->set_filename( $this->file);
     return $response;
   }
@@ -52,8 +54,10 @@ abstract class Controller_Manager extends Controller {
    * @param string $uri
    * @return string
    */
-  protected function execute( $uri, View $view = NULL){
-    $response = (string)Manager::execute($uri, $view, Manager::cache());
+  protected function execute( $uri, View $view = NULL, $cache = TRUE){
+    if ( $cache) $cache = Manager::cache();
+    else $cache = NULL;
+    $response = (string)Manager::execute($uri, $view, $cache);
     if ( $this->view && $this->file)  $this->view->set_filename( $this->file);
     return $response;
   }
