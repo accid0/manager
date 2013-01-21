@@ -112,7 +112,7 @@ abstract class Controller_Manager extends Controller {
    */
   public function after(){
     if ( $this->auto_render === TRUE && $this->view){
-      $this->response->body( $this->view);
+      $this->response->body( $this->view->render());
     }
     $this->finalize();
     parent::after();
