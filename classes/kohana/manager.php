@@ -14,7 +14,7 @@ class Kohana_Manager
    *
    * @var Kohana_Manager
    */
-  private static $instance = NULL;
+  private static $instance = null;
   /**
    *
    * Enter description here ...
@@ -29,30 +29,37 @@ class Kohana_Manager
    * @var array
    */
   private $gets = array();
+
+  /**
+   * Initial query
+   * @var null
+   */
+  private $_uri = null;
+
   /**
    *
    * Enter description here ...
    *
    * @var Config
    */
-  private $config = NULL;
+  private $config = null;
   /**
    *
    * @var boolean
    */
-  private $init = TRUE;
+  private $init = true;
   /**
    *
    * Enter description here ...
    *
    * @var View|NULL
    */
-  private $template = NULL;
+  private $template = null;
 
   /**
    * @var HTTP_Cache|NULL
    */
-  private $cache = NULL;
+  private $cache = null;
 
   /**
    *
@@ -64,8 +71,31 @@ class Kohana_Manager
    */
   private static function instance($uri = '')
   {
-    if ( self::$instance === NULL ) self::$instance = new self($uri);
+    if ( self::$instance === null ) self::$instance = new self($uri);
     return self::$instance;
+  }
+
+  /**
+   * @param string $uri
+   */
+  private function init( $uri){
+    $this->_uri = $uri;
+    if ( Utf8::strpos( $uri, '?') !== false){
+      $uri = explode( '?', $uri);
+      if ( $uri[0] == '' && count($uri) > 1)
+        array_shift($uri);
+      $gets = array();
+      parse_str($uri[1], $gets);
+      $this->gets = $gets;
+      if ( !Request::initial() )
+        parse_str($uri[1], $_GET);
+    }
+    else $uri = array($uri);
+    $actions = explode('/', $uri[0]);
+    if ( $actions[0] == '' && count($actions) > 1)
+      array_shift($actions);
+    $this->actions = $actions;
+    $this->config  = Kohana::$config->load('manager');
   }
 
   /**
@@ -76,20 +106,7 @@ class Kohana_Manager
    */
   private function __construct($uri)
   {
-    if ( Utf8::strpos( $uri, '?') !== FALSE){
-      $uri = explode( '?', $uri);
-      if ( $uri[0] == '' && count($uri) > 1)
-        array_shift($uri);
-      $gets = array();
-      parse_str($uri[1], $gets);
-      $this->gets = $gets;
-    }
-    else $uri = array($uri);
-    $actions = explode('/', $uri[0]);
-    if ( $actions[0] == '' && count($actions) > 1)
-      array_shift($actions);
-    $this->actions = $actions;
-    $this->config  = Kohana::$config->load('manager');
+    $this->init( $uri);
   }
 
   /**
@@ -112,7 +129,7 @@ class Kohana_Manager
   private function doParse($uri)
   {
     if ($this->init) {
-      $this->init = FALSE;
+      $this->init = false;
       $directory  = $this->config->get('views');
       $directory  = $directory['path'];
 
@@ -135,7 +152,7 @@ class Kohana_Manager
         );
       }
       else {
-        $directory .= URL::title( $this->actions[0], '', TRUE);
+        $directory .= URL::title( $this->actions[0], '', true);
         $result = array(
           'controller' => 'main',
           'action'     => 'index',
@@ -149,27 +166,30 @@ class Kohana_Manager
       $actions = explode('/', $uri);
       $this->ensure(empty($actions[0]), "[Module::Manager] Uri empty;");
       $request    = Request::current();
+      $query = $request->param('query');
       $position   = $request->param('position');
 
       $directory  = $request->directory();
 
       if( isset($this->actions[++$position]))
-        $directory = $directory . DIRECTORY_SEPARATOR . URL::title( $this->actions[$position], '', TRUE);
+        $directory = $directory . DIRECTORY_SEPARATOR . URL::title( $this->actions[$position], '', true);
 
       $result = array(
         'controller' => preg_replace('![^\pL\pN\s]++!u', '', $actions[0]),
         'action'     => 'index',
         'directory'  => $directory,
+        'query'      => $query,
       );
       unset($actions[0]);
       foreach ($actions as $i => $key) {
         if( isset($this->actions[++$position]))
           $result [$key] = $this->actions[$position];
-        else $result[$key] = NULL;
+        else $result[$key] = null;
       }
       $result['position'] = $position;
     }
     $result = Arr::merge( $result, $this->gets);
+    $result['current_root'] = $this->_uri;
     return $result;
   }
 
@@ -189,7 +209,7 @@ class Kohana_Manager
 
     $class = str_replace(array('\\', '/'), '_', trim($class, '/\\'));
 
-    $this->ensure($config['create'] !== TRUE && !class_exists($class),
+    $this->ensure($config['create'] !== true && !class_exists($class),
       "[Modules::Manager] class [$class] not found");
 
     if (!class_exists($class)) {
@@ -243,7 +263,7 @@ class $name extends Controller_Manager{
 }
 EOF;
       if (!is_dir($file->getPath()))
-        @mkdir($file->getPath(), 0755, TRUE);
+        @mkdir($file->getPath(), 0755, true);
       $fs = $file->openFile('a');
       $fs->fwrite($code);
       $fs->eof();
@@ -291,10 +311,10 @@ EOF;
    *
    * @return Response
    */
-  public static function execute($uri, $template = NULL, HTTP_Cache $cache = NULL)
+  public static function execute($uri, $template = null, HTTP_Cache $cache = null)
   {
     $current        = self::$instance;
-    self::$instance = NULL;
+    self::$instance = null;
     self::instance($uri)->template($template);
     self::instance($uri)->cache($cache);
     $response       = Request::factory($uri, $cache)->execute();
@@ -307,7 +327,7 @@ EOF;
    *
    * @param View|NULL $template
    */
-  public static function template($template = NULL)
+  public static function template($template = null)
   {
     $instance = self::instance();
     $result   = $template;
@@ -321,7 +341,7 @@ EOF;
    * @param HTTP_Cache|null $cache
    * @return HTTP_Cache|null
    */
-  public static function cache( HTTP_Cache $cache = NULL){
+  public static function cache( HTTP_Cache $cache = null){
     $instance = self::instance();
     $result   = $cache;
     if (!is_null($cache)) $instance->cache = $cache;
