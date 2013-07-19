@@ -230,7 +230,7 @@ class Kohana_Manager
         else $result[$key] = null;
       }
       $result['position'] = $position;
-      $query = ''
+      $query = '';
       for($i=$position+1; $i<count($this->actions); $i++){
         $query .= ( $i === ($position+1) ? '' : '/' ) . $this->actions[$i];
       }
