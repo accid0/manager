@@ -18,6 +18,26 @@ abstract class Controller_Manager extends Controller {
    * @var boolean
    */
   protected $auto_render = TRUE;
+
+  // private trigger_events() {{{ 
+  /**
+   * trigger_events
+   * 
+   * @access private
+   * @return void
+   */
+  private function trigger_events(){
+    $event = $this->request->param('_event');
+    try{
+      Manager::trigger( $event, $this->view, $this->request );
+    }
+    catch( Exception $e ){
+      // @todo realize log errors
+      throw new Exception($e);
+    }
+  }
+  // }}}
+
   /**
    * @param boolean $exp
    * @param string $msg
@@ -28,9 +48,9 @@ abstract class Controller_Manager extends Controller {
   }
   /**
    */
-  protected function initialize()
-  {
+  protected function initialize(){
   }
+
   /**
    */
   protected function finalize(){
@@ -85,13 +105,13 @@ abstract class Controller_Manager extends Controller {
         Manager::template( $this->view);
       }
     }
+    $this->trigger_events();
     parent::before();
   }
 
   /**
    * Standart action method of controller from manager
    * For params of action
-   * @see Request::param( $sid, $default)
    */
   public function action_index(){
     $this->do_action();
@@ -100,7 +120,6 @@ abstract class Controller_Manager extends Controller {
   /**
    * Innerhiting this method for your controller
    * For params of action
-   * @see Request::param( $sid, $default)
    */
   protected function do_action(){
 
