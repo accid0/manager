@@ -177,7 +177,6 @@ class Kohana_Manager
         $query .= $this->actions[$i++] . '/';
       if ( isset( $this->actions[$i]))
         $query .= $this->actions[$i];
-
       if (strlen($directory) ) $directory .= DIRECTORY_SEPARATOR;
       if (empty($this->actions[0])) {
         $directory .= 'index';
@@ -187,7 +186,7 @@ class Kohana_Manager
           'position'   => 0,
           'directory'  => $directory,
           'query'      => $query,
-          '_event'     => $directory,
+          '_event'     => 'index',
         );
       }
       else {
@@ -198,7 +197,7 @@ class Kohana_Manager
           'position'   => 0,
           'directory'  => $directory,
           'query'      => $query,
-          '_event'     => $directory,
+          '_event'     => implode( '_', $this->actions ),
         );
       }
     }
@@ -213,14 +212,17 @@ class Kohana_Manager
 
       if( isset($this->actions[++$position]))
         $directory = $directory . DIRECTORY_SEPARATOR . URL::title( $this->actions[$position], '', true);
-
+      $event = '';
+      for( $i=0; $i<=$position; $i++ ){
+        $event .= ( strlen($event) ? '_' : '' ) . $this->actions[$position];
+      }
       $controller = preg_replace('![^\pL\pN\s]++!u', '', $actions[0]);
       $result = array(
         'controller'  => $controller,
         'action'      => 'index',
         'directory'   => $directory,
         'query'       => $query,
-        '_event'      => $directory . '_' . $controller,
+        '_event'      => $event . '_' . $controller,
       );
       unset($actions[0]);
       foreach ($actions as $i => $key) {
