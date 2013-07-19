@@ -8,6 +8,35 @@
  */
 class Kohana_Manager
 {
+
+  /**
+   * ATTR_LOW_EVENT_PRIORITY 
+   * 
+   * @const int
+   */
+  const ATTR_LOW_EVENT_PRIORITY         = 100;
+
+  /**
+   * ATTR_NORMAL_EVENT_PRIORITY 
+   * 
+   * @const int
+   */
+  const ATTR_NORMAL_EVENT_PRIORITY      = 50;
+
+  /**
+   * ATTR_HIGH_EVENT_PRIORITY 
+   * 
+   * @const int
+   */
+  const ATTR_HIGH_EVENT_PRIORITY        = 10;
+
+  /**
+   * ATTR_EXPRESS_EVENT_PRIORITY 
+   * 
+   * @const int
+   */
+  const ATTR_EXPRESS_EVENT_PRIORITY     = 0;
+
   /**
    *
    * Enter description here ...
@@ -15,6 +44,12 @@ class Kohana_Manager
    * @var Kohana_Manager
    */
   private static $instance = NULL;
+
+  /**
+   * @var array $events
+   * @static
+   */
+  private static $events = array();
   
   /**
    *
@@ -143,7 +178,7 @@ class Kohana_Manager
       if ( isset( $this->actions[$i]))
         $query .= $this->actions[$i];
 
-      if (!empty($directory)) $directory .= DIRECTORY_SEPARATOR;
+      if (!strlen($directory)) $directory .= DIRECTORY_SEPARATOR;
       if (empty($this->actions[0])) {
         $directory .= 'index';
         $result = array(
@@ -152,6 +187,7 @@ class Kohana_Manager
           'position'   => 0,
           'directory'  => $directory,
           'query'      => $query,
+          '_event'     => $directory,
         );
       }
       else {
@@ -162,6 +198,7 @@ class Kohana_Manager
           'position'   => 0,
           'directory'  => $directory,
           'query'      => $query,
+          '_event'     => $directory,
         );
       }
     }
@@ -177,11 +214,13 @@ class Kohana_Manager
       if( isset($this->actions[++$position]))
         $directory = $directory . DIRECTORY_SEPARATOR . URL::title( $this->actions[$position], '', true);
 
+      $controller = preg_replace('![^\pL\pN\s]++!u', '', $actions[0]);
       $result = array(
-        'controller' => preg_replace('![^\pL\pN\s]++!u', '', $actions[0]),
-        'action'     => 'index',
-        'directory'  => $directory,
-        'query'      => $query,
+        'controller'  => $controller,
+        'action'      => 'index',
+        'directory'   => $directory,
+        'query'       => $query,
+        '_event'      => $directory . '_' . $controller,
       );
       unset($actions[0]);
       foreach ($actions as $i => $key) {
@@ -351,5 +390,58 @@ EOF;
     else  $result = $instance->cache;
     return $result;
   }
+
+  // public bind(event,closure,priority=self::ATTR_NORMAL_EVENT_PRIORITY) {{{ 
+  /**
+   * bind
+   * 
+   * @param string  $event 
+   * @param closure $closure 
+   * @param integer $priority 
+   * @static
+   * @access public
+   * @return bool
+   */
+  public static function bind( $event, $closure, $priority = self::ATTR_NORMAL_EVENT_PRIORITY ){
+    $return = false;
+    if ( is_callable( $closure ) && is_int( $priority ) ){
+      if ( !array_key_exists( $event, self::$events ) ) 
+        self::$events[$event] = array();
+      if ( array_key_exists( $priority, self::$events[$event]) )
+        array_push( self::$events[$event][$priority], $closure);
+      else self::$events[$event][$priority] = array( $closure );
+      ksort(self::$events[$event]);
+      $return = true;
+    }
+
+    return $return;
+  }
+  // }}}
+
+  // public trigger(event) {{{ 
+  /**
+   * trigger
+   * 
+   * @param string  $event 
+   * @static
+   * @access public
+   * @return bool
+   */
+  public static function trigger( $event ){
+    $return = false;
+    if ( array_key_exists( $event, self::$events) ){
+      $args = func_get_args();
+      array_shift($args);
+      foreach( self::$events[$event] as $callbacks ){
+        foreach( $callbacks as $cb){
+          call_user_func_array( $cb, $args);
+        }
+      }
+      $return = true;
+    }
+
+    return $return;
+  }
+  // }}}
 
 }
