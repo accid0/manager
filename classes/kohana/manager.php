@@ -209,7 +209,7 @@ class Kohana_Manager
       $position   = $request->param('position');
       $directory  = $request->directory();
       if( isset($this->actions[++$position])){
-        $sid = URL::title( $this->actions[$position], '', true)
+        $sid = URL::title( $this->actions[$position], '', true);
         $directory = $directory . DIRECTORY_SEPARATOR . $sid;
       }
       $event = '';
