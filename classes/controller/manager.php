@@ -112,18 +112,10 @@ abstract class Controller_Manager extends Controller {
    */
   public function after(){
     if ( $this->auto_render === TRUE && $this->view){
-<<<<<<< HEAD
       $this->response->body( $this->view->render());
-=======
-      $this->response->body( $this->view);
->>>>>>> 775854029cab69da707de03b0d4450f370eb3634
     }
     $this->finalize();
     parent::after();
   }
 
-<<<<<<< HEAD
 } // End Manager
-=======
-} // End Manager
->>>>>>> 775854029cab69da707de03b0d4450f370eb3634
