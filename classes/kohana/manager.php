@@ -209,15 +209,15 @@ class Kohana_Manager
       $query = $request->param('query');
       $event = $request->param('event');
       $position   = $request->param('position');
-
       $directory  = $request->directory();
-
       if( isset($this->actions[++$position])){
         $sid = URL::title( $this->actions[$position], '', true)
         $directory = $directory . DIRECTORY_SEPARATOR . $sid;
-        $event .= "_{$sid}";
       }
-      
+      $event = '';
+      for( $i=0; $i<=$position; $i++){
+        if ( isset($this->actions[$i]) ) $event .= ( $i===0 ? '' : '_' ) . $this->actions[$i];
+      }
       $controller = Url::title( preg_replace('![^\pL\pN\s]++!u', '', $actions[0]), '', true );
       $result = array(
         'controller'  => $controller,
