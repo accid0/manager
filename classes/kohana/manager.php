@@ -178,7 +178,7 @@ class Kohana_Manager
       if ( isset( $this->actions[$i]))
         $query .= $this->actions[$i];
 
-      if (!strlen($directory)) $directory .= DIRECTORY_SEPARATOR;
+      if (strlen($directory) ) $directory .= DIRECTORY_SEPARATOR;
       if (empty($this->actions[0])) {
         $directory .= 'index';
         $result = array(
