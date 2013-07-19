@@ -190,14 +190,15 @@ class Kohana_Manager
         );
       }
       else {
-        $directory .= URL::title( $this->actions[0], '', true);
+        $sid = URL::title( $this->actions[0], '', true);
+        $directory .= $sid;
         $result = array(
           'controller' => 'main',
           'action'     => 'index',
           'position'   => 0,
           'directory'  => $directory,
           'query'      => $query,
-          '_event'     => implode( '_', $this->actions ),
+          '_event'     => $sid,
         );
       }
     }
@@ -206,23 +207,24 @@ class Kohana_Manager
       $this->ensure(empty($actions[0]), "[Module::Manager] Uri empty;");
       $request    = Request::current();
       $query = $request->param('query');
+      $event = $request->param('event');
       $position   = $request->param('position');
 
       $directory  = $request->directory();
 
-      if( isset($this->actions[++$position]))
-        $directory = $directory . DIRECTORY_SEPARATOR . URL::title( $this->actions[$position], '', true);
-      $event = '';
-      for( $i=0; $i<=$position; $i++ ){
-        $event .= ( strlen($event) ? '_' : '' ) . $this->actions[$position];
+      if( isset($this->actions[++$position])){
+        $sid = URL::title( $this->actions[$position], '', true)
+        $directory = $directory . DIRECTORY_SEPARATOR . $sid;
+        $event .= "_{$sid}";
       }
-      $controller = preg_replace('![^\pL\pN\s]++!u', '', $actions[0]);
+      
+      $controller = Url::title( preg_replace('![^\pL\pN\s]++!u', '', $actions[0]), '', true );
       $result = array(
         'controller'  => $controller,
         'action'      => 'index',
         'directory'   => $directory,
         'query'       => $query,
-        '_event'      => $event . '_' . $controller,
+        '_event'      => "{$event}_{$controller}",
       );
       unset($actions[0]);
       foreach ($actions as $i => $key) {
