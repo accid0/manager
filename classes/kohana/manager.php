@@ -206,8 +206,6 @@ class Kohana_Manager
       $actions = explode('/', $uri);
       $this->ensure(empty($actions[0]), "[Module::Manager] Uri empty;");
       $request    = Request::current();
-      $query = $request->param('query');
-      $event = $request->param('event');
       $position   = $request->param('position');
       $directory  = $request->directory();
       if( isset($this->actions[++$position])){
@@ -223,16 +221,20 @@ class Kohana_Manager
         'controller'  => $controller,
         'action'      => 'index',
         'directory'   => $directory,
-        'query'       => $query,
         '_event'      => "{$event}_{$controller}",
       );
       unset($actions[0]);
       foreach ($actions as $i => $key) {
         if( isset($this->actions[++$position]))
-          $result [$key] = $this->actions[$position];
+          $result[$key] = $this->actions[$position];
         else $result[$key] = null;
       }
       $result['position'] = $position;
+      $query = ''
+      for($i=$position+1; $i<count($this->actions); $i++){
+        $query .= ( $i === ($position+1) ? '' : '/' ) . $this->actions[$i];
+      }
+      $result['query'] = $query;
     }
     $result = Arr::merge( $result, $this->gets);
     $result['current_root'] = $this->_uri;
