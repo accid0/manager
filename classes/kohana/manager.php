@@ -14,7 +14,8 @@ class Kohana_Manager
    *
    * @var Kohana_Manager
    */
-  private static $instance = null;
+  private static $instance = NULL;
+  
   /**
    *
    * Enter description here ...
@@ -43,11 +44,13 @@ class Kohana_Manager
    * @var Config
    */
   private $config = null;
+  
   /**
    *
    * @var boolean
    */
   private $init = true;
+  
   /**
    *
    * Enter description here ...
