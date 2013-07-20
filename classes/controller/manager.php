@@ -28,13 +28,7 @@ abstract class Controller_Manager extends Controller {
    */
   private function trigger_events(){
     $event = $this->request->param('_event');
-    try{
-      Manager::trigger( $event, $this->view, $this->request );
-    }
-    catch( Exception $e ){
-      // @todo realize log errors
-      throw new Exception($e);
-    }
+    Manager::trigger( $event, $this->view, $this->request );
   }
   // }}}
 
@@ -104,6 +98,9 @@ abstract class Controller_Manager extends Controller {
         $this->view = View::factory( $this->file);
         Manager::template( $this->view);
       }
+      else{
+        $this->view = View_Null::factory();
+      }
     }
     $this->trigger_events();
     parent::before();
@@ -130,7 +127,7 @@ abstract class Controller_Manager extends Controller {
    * @see Kohana_Controller::after()
    */
   public function after(){
-    if ( $this->auto_render === TRUE && $this->view){
+    if ( $this->auto_render === TRUE && $this->view && !( $this->view instanceof View_Null ) ){
       $this->response->body( $this->view->render());
     }
     $this->finalize();
