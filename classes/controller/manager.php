@@ -60,7 +60,7 @@ abstract class Controller_Manager extends Controller {
     if ( $cache) $cache = Manager::cache();
     else $cache = NULL;
     $response = (string)Request::factory( $uri, $cache)->execute();
-    if ( $this->view && $this->file)  $this->view->set_filename( $this->file);
+    if ( $this->view && strlen($this->file) )  $this->view->set_filename( $this->file);
     return $response;
   }
   /**
@@ -72,7 +72,7 @@ abstract class Controller_Manager extends Controller {
     if ( $cache) $cache = Manager::cache();
     else $cache = NULL;
     $response = (string)Manager::execute($uri, $view, $cache);
-    if ( $this->view && $this->file)  $this->view->set_filename( $this->file);
+    if ( $this->view && strlen($this->file) )  $this->view->set_filename( $this->file);
     return $response;
   }
   
@@ -87,7 +87,7 @@ abstract class Controller_Manager extends Controller {
     }
     if ( $this->auto_render === TRUE){
       if ( $this->view = Manager::template()){
-        if ( $this->file != NULL && $this->file != '')
+        if ( $this->file != NULL && strlen( $this->file ) )
           $this->view->set_filename( $this->file);
         else{
           $this->auto_render = FALSE;
@@ -96,10 +96,11 @@ abstract class Controller_Manager extends Controller {
       }
       elseif( $this->file != NULL && $this->file != ''){
         $this->view = View::factory( $this->file);
-        Manager::template( $this->view);
+        Manager::template( $this->view );
       }
       else{
         $this->view = View_Null::factory();
+        Manager::template( $this->view );
       }
     }
     $this->trigger_events();
