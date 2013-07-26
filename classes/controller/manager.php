@@ -2,6 +2,18 @@
 
 abstract class Controller_Manager extends Controller {
   /**
+   * OBJECT 
+   * 
+   * @const int
+   */
+  const OBJECT        = 1;
+  /**
+   * STRING 
+   * 
+   * @const int
+   */
+  const STRING        = 2;
+  /**
    * @var string
    */
   protected $template = NULL;
@@ -56,11 +68,11 @@ abstract class Controller_Manager extends Controller {
    * @param string $uri
    * @return string
    */
-  protected function extend( $uri, $cache = TRUE, $check = TRUE ){
+  protected function extend( $uri, $cache = TRUE, $check = self::STRING ){
     if ( $cache) $cache = Manager::cache();
     else $cache = NULL;
     $response = Request::factory( $uri, $cache)->execute();
-    if ( $check ) $response = (string)$response;
+    if ( self::STRING === $check ) $response = (string)$response;
     if ( $this->view && strlen($this->file) )  $this->view->set_filename( $this->file);
     return $response;
   }
@@ -69,11 +81,11 @@ abstract class Controller_Manager extends Controller {
    * @param string $uri
    * @return string
    */
-  protected function execute( $uri, View $view = NULL, $cache = TRUE, $check = TRUE ){
+  protected function execute( $uri, View $view = NULL, $cache = TRUE, $check = self::STRING ){
     if ( $cache) $cache = Manager::cache();
     else $cache = NULL;
     $response = Manager::execute($uri, $view, $cache);
-    if ( $check ) $response = (string)$response;
+    if ( self::STRING === $check ) $response = (string)$response;
     if ( $this->view && strlen($this->file) )  $this->view->set_filename( $this->file);
     return $response;
   }
