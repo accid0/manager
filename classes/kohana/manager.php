@@ -214,7 +214,10 @@ class Kohana_Manager
       }
       $event = '';
       for( $i=0; $i<=$position; $i++){
-        if ( isset($this->actions[$i]) ) $event .= ( $i===0 ? '' : '_' ) . $this->actions[$i];
+        if ( isset($this->actions[$i]) ) {
+          $part   = Url::title( $this->actions[$i], '_', true );
+          $event .= ( $i===0 ? '' : '_' ) . $part;
+        }
       }
       $controller = Url::title( preg_replace('![^\pL\pN\s]++!u', '', $actions[0]), '', true );
       $result = array(
