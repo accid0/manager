@@ -215,7 +215,7 @@ class Kohana_Manager
       $event = '';
       for( $i=0; $i<=$position; $i++){
         if ( isset($this->actions[$i]) ) {
-          $part   = Url::title( $this->actions[$i], '_', true );
+          $part   = Utf8::str_ireplace( array('-', '.', ',', ' ', '\\', '/'), '_', $this->actions[$i] );
           $event .= ( $i===0 ? '' : '_' ) . $part;
         }
       }
