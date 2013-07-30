@@ -141,7 +141,10 @@ class Kohana_Manager
       array_shift($actions);
     $this->actions = $actions;
     $this->config  = Kohana::$config->load('manager');
-    $this->gets    = $gets;
+    if ( !Request::initial() )
+      $this->gets  = Arr::merge( $_GET, $gets );
+    else
+      $this->gets    = $gets;
   }
   // }}}
 
