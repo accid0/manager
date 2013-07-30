@@ -378,11 +378,13 @@ EOF;
    *
    * @return Response
    */
-  public static function execute($uri, $template = null, HTTP_Cache $cache = null)
+  public static function execute($uri, $template = null, HTTP_Cache $cache = null, array $gets = null )
   {
     $current        = self::$instance;
     self::$instance = null;
-    $new = self::instance($uri, $current->gets);
+    if ( null === $gets || empty($gets) )
+      $gets = $current->gets;
+    $new = self::instance($uri, $gets);
     $new->template($template);
     $new->cache($cache);
     $response       = Request::factory($uri, $cache)->execute();
