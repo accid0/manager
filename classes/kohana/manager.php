@@ -99,32 +99,39 @@ class Kohana_Manager
    */
   private $cache = null;
 
+  // private instance(uri='',array gets=array()) {{{ 
   /**
-   *
-   * Enter description here ...
-   *
-   * @param string $uri
-   *
-   * @return Kohana_Manager
+   * instance
+   * 
+   * @param string $uri 
+   * @param array $gets 
+   * @static
+   * @access private
+   * @return void
    */
-  private static function instance($uri = '')
+  private static function instance( $uri = '', array $gets = null )
   {
-    if ( self::$instance === null ) self::$instance = new self($uri);
+    if ( self::$instance === null ) self::$instance = new self( $uri, (array)$gets );
     return self::$instance;
   }
+  // }}}
 
+  // private init(uri,array gets) {{{ 
   /**
-   * @param string $uri
+   * init
+   * 
+   * @param string  $uri 
+   * @param array   $gets 
+   * @access private
+   * @return void
    */
-  private function init( $uri){
+  private function init( $uri, array $gets ){
     $this->_uri = $uri;
     if ( Utf8::strpos( $uri, '?') !== false){
       $uri = explode( '?', $uri);
       if ( $uri[0] == '' && count($uri) > 1)
         array_shift($uri);
-      $gets = array();
-      parse_str($uri[1], $gets);
-      $this->gets = $gets;
+      parse_str( $uri[1], $gets );
       if ( !Request::initial() )
         parse_str($uri[1], $_GET);
     }
@@ -134,18 +141,24 @@ class Kohana_Manager
       array_shift($actions);
     $this->actions = $actions;
     $this->config  = Kohana::$config->load('manager');
+    $this->gets    = $gets;
   }
+  // }}}
 
+  // private __construct(uri,array gets) {{{ 
   /**
-   *
-   * Enter description here ...
-   *
-   * @param unknown_type $uri
+   * __construct
+   * 
+   * @param mixed $uri 
+   * @param array $gets 
+   * @access private
+   * @return void
    */
-  private function __construct($uri)
+  private function __construct( $uri, array $gets )
   {
-    $this->init( $uri);
+    $this->init( $uri, $gets );
   }
+  // }}}
 
   /**
    *
@@ -228,7 +241,7 @@ class Kohana_Manager
       );
       unset($actions[0]);
       foreach ($actions as $i => $key) {
-        if( isset($this->actions[++$position]))
+        if( isset($this->actions[++$position]) && !array_key_exists($result[$key]) )
           $result[$key] = $this->actions[$position];
         else $result[$key] = null;
       }
@@ -239,7 +252,7 @@ class Kohana_Manager
       }
       $result['query'] = $query;
     }
-    $result = Arr::merge( $result, $this->gets);
+    $result = Arr::merge( $this->gets, $result );
     $result['current_root'] = $this->_uri;
     return $result;
   }
@@ -366,8 +379,9 @@ EOF;
   {
     $current        = self::$instance;
     self::$instance = null;
-    self::instance($uri)->template($template);
-    self::instance($uri)->cache($cache);
+    $new = self::instance($uri, $current->gets);
+    $new->template($template);
+    $new->cache($cache);
     $response       = Request::factory($uri, $cache)->execute();
     //$response->send_headers();
     self::$instance = $current;
@@ -380,6 +394,8 @@ EOF;
    */
   public static function template($template = null)
   {
+    if (!self::$instance)
+      throw new Request_Exception("[Modules::Manager] Instance not found");
     $instance = self::instance();
     $result   = $template;
     if (!is_null($template)) $instance->template = $template;
@@ -393,6 +409,8 @@ EOF;
    * @return HTTP_Cache|null
    */
   public static function cache( HTTP_Cache $cache = null){
+    if (!self::$instance)
+      throw new Request_Exception("[Modules::Manager] Instance not found");
     $instance = self::instance();
     $result   = $cache;
     if (!is_null($cache)) $instance->cache = $cache;
