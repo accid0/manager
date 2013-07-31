@@ -131,9 +131,11 @@ class Kohana_Manager
       $uri = explode( '?', $uri);
       if ( $uri[0] == '' && count($uri) > 1)
         array_shift($uri);
-      parse_str( $uri[1], $gets );
+      $t = array();
+      parse_str( $uri[1], $t );
+      $gets = Arr::merge( $t, $gets );
       if ( !Request::initial() )
-        parse_str($uri[1], $_GET);
+        $_GET = Arr::merge($_GET, $t);
     }
     else $uri = array($uri);
     $actions = explode('/', $uri[0]);
