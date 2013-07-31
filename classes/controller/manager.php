@@ -76,19 +76,28 @@ abstract class Controller_Manager extends Controller {
     if ( $this->view && strlen($this->file) )  $this->view->set_filename( $this->file);
     return $response;
   }
+
+  // protected execute(uri,Viewview=NULL,cache=TRUE,check=self::STRING,arraygets=null) {{{ 
   /**
+   * execute
    * 
-   * @param string $uri
-   * @return string
+   * @param string  $uri 
+   * @param View    $view 
+   * @param bool    $cache 
+   * @param string  $check 
+   * @param array   $gets 
+   * @access protected
+   * @return Response
    */
-  protected function execute( $uri, View $view = NULL, $cache = TRUE, $check = self::STRING ){
+  protected function execute( $uri, View $view = NULL, $cache = TRUE, $check = self::STRING, array $gets = null ){
     if ( $cache) $cache = Manager::cache();
     else $cache = NULL;
-    $response = Manager::execute($uri, $view, $cache);
+    $response = Manager::execute( $uri, $view, $cache, $gets );
     if ( self::STRING === $check ) $response = (string)$response;
     if ( $this->view && strlen($this->file) )  $this->view->set_filename( $this->file);
     return $response;
   }
+  // }}}
   
   /**
    * (non-PHPdoc)
