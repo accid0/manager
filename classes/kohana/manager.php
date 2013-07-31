@@ -410,6 +410,25 @@ EOF;
     return $result;
   }
 
+  // public gets(array gets=null) {{{ 
+  /**
+   * gets
+   * 
+   * @param array $gets 
+   * @static
+   * @access public
+   * @return void
+   */
+  public static function gets(array $gets = null)
+  {
+    if (!self::$instance)
+      throw new Request_Exception("[Modules::Manager] Instance not found");
+    $instance = self::instance();
+    if (null !== $gets) $instance->gets = $gets;
+    else  return $instance->gets;
+  }
+  // }}}
+
   /**
    * @static
    * @param HTTP_Cache|null $cache
